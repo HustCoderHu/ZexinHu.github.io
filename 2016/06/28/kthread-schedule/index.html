@@ -1,0 +1,758 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="内核调度," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="版权声明：本文为博主原创文章，转载请注明">
+<meta property="og:type" content="article">
+<meta property="og:title" content="kthread schedule">
+<meta property="og:url" content="http://yoursite.com/2016/06/28/kthread-schedule/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="版权声明：本文为博主原创文章，转载请注明">
+<meta property="og:image" content="http://yoursite.com/my_images/kthread-schedule/TASK_STATE-sched.png">
+<meta property="og:updated_time" content="2016-07-12T07:41:44.974Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="kthread schedule">
+<meta name="twitter:description" content="版权声明：本文为博主原创文章，转载请注明">
+<meta name="twitter:image" content="http://yoursite.com/my_images/kthread-schedule/TASK_STATE-sched.png">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Muse',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: 'Author'
+    }
+  };
+</script>
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2016/06/28/kthread-schedule/"/>
+
+  <title> kthread schedule | Hexo </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">Hexo</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle"></p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                kthread schedule
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">Posted on</span>
+            <time itemprop="dateCreated" datetime="2016-06-28T20:00:44+08:00" content="2016-06-28">
+              2016-06-28
+            </time>
+          </span>
+
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>版权声明：本文为博主原创文章，转载请注明  </p>
+<a id="more"></a>
+<h1 id="线程描述"><a href="#线程描述" class="headerlink" title="线程描述"></a>线程描述</h1><p>摘自  </p>
+<font color="red"><strong>kernel-3.10.102</strong></font> include/linux/sched.h<br><br><img src="/my_images/kthread-schedule/TASK_STATE-sched.png" alt="task-state.png"><br><br>除了RUNNING外，都不占有CPU<br><br>当前线程中有个 <font color="red"><strong>current</strong></font> 宏有效，是指向自身结构的指针<br>后面对线程的操作，都针对线(进)程描述符 <font color="red"><strong>task_struct</strong></font>
+
+<h1 id="调度"><a href="#调度" class="headerlink" title="调度"></a>调度</h1><p>当线程执行的条件得不到满足，可以用以下两行使线程<font color="red"><strong>让出</strong></font>CPU</p>
+<pre><code>set_current_state(TASK_INTERRUPTIBLE);
+schedule();
+</code></pre>
+schedule()会开始寻找下一个被调度的线程，当前线程的去向，则由其状态决定  
+<font color="red">**为什么**</font>调度前要  
+set\_current\_state，下面来解释  
+
+schedule的实现在 /kernel/sched/core.c 中，如下
+<pre><code>asmlinkage void __sched schedule(void)
+{
+    struct task_struct *tsk = current;
+    sched_submit_work(tsk);
+    __schedule();
+}
+</code></pre>
+__schedule()的实现也在这个文件中，关键位置已经<font color="red">**红字**</font>标出
+<pre><code>static void __sched __schedule(void)
+{
+    struct task_struct *prev, *next;
+    unsigned long *switch_count;
+    struct rq *rq;
+    int cpu;
+
+need_resched:
+    preempt_disable();            //禁止内核抢占
+    cpu = smp_processor_id();    //当前cpu id
+    rq = cpu_rq(cpu);            //当前cpu所拥有的runqueue
+    rcu_note_context_switch(cpu); //RCU  ？？？
+    prev = rq->curr;                //当前运行的线程赋值给prev
+
+    schedule_debug(prev);
+
+    if (sched_feat(HRTICK))
+        hrtick_clear(rq);
+
+    /*
+     * Make sure that signal_pending_state()->signal_pending() below
+     * can't be reordered with __set_current_state(TASK_INTERRUPTIBLE)
+     * done by the caller to avoid the race with signal_wake_up().
+     */
+    smp_mb__before_spinlock();
+    //寻找别的进程时需要关闭抢占，获取自旋锁；
+    raw_spin_lock_irq(&rq->lock);
+
+    switch_count = &prev->nivcsw;
+    <font color="red">if (prev->state && !(preempt_count() & PREEMPT_ACTIVE))</font> {
+    //检查prev->state的标志，如果不是可运行态，在内核态没有被抢占，则从运行队列中将此删除
+    //但是如果是由于非阻塞信号挂起，而且状态为TASK_INTERRUPTIBLE，则将进程设置为TASK_RUNNING并插入队列；
+        if (unlikely(signal_pending_state(prev->state, prev))) {
+            prev->state = TASK_RUNNING;
+        } else {
+            <font color="red">deactivate_task</font>(rq, prev, DEQUEUE_SLEEP);
+            prev->on_rq = 0;
+
+            /*
+             * If a worker went to sleep, notify and ask workqueue
+             * whether it wants to wake up a task to maintain
+             * concurrency.
+             */
+            if (prev->flags & PF_WQ_WORKER) {
+                struct task_struct *to_wakeup;
+
+                to_wakeup = wq_worker_sleeping(prev, cpu);
+                if (to_wakeup)
+                    try_to_wake_up_local(to_wakeup);
+            }
+        }
+        switch_count = &prev->nvcsw;
+    }
+
+    pre_schedule(rq, prev);
+
+    if (unlikely(!rq->nr_running))
+        idle_balance(cpu, rq);
+    /*将当前进程，也就是被切换出去的进程重新 
+    插入到各自的运行队列中，对于CFS算法插入 
+    到合适的位置上，对于实时调度插入到同一个 
+    优先级队列的链表尾部*/
+    put_prev_task(rq, prev);
+    next = pick_next_task(rq);
+    //清除prev的TIF_NEED_RESCHED标志
+    clear_tsk_need_resched(prev);
+    rq->skip_clock_update = 0;
+
+    if (likely(prev != next)) { //如果prev和next不同
+        rq->nr_switches++;        //队列切换次数
+        rq->curr = next;
+        ++*switch_count;        //线程切换次数
+
+        context_switch(rq, prev, next); /* unlocks the rq */
+        /*
+         * The context switch have flipped the stack from under us
+         * and restored the local variables which were saved when
+         * this task called schedule() in the past. prev == current
+         * is still correct, but it can be moved to another cpu/rq.
+         */
+        cpu = smp_processor_id();
+        rq = cpu_rq(cpu);
+    } else
+        raw_spin_unlock_irq(&rq->lock);
+
+    post_schedule(rq);
+    //允许抢占
+    sched_preempt_enable_no_resched();
+    if (need_resched())
+        goto need_resched;
+}
+</code></pre>
+
+<p><strong>说明:</strong> 如果当前线程还是running，就不会执行到deactivate_task，线程仍有可能占有CPU，没有达到sleep的目标。set_current_state就是为了设置这个判断条件  </p>
+<p>schedule也有带<font color="red"><strong>超时</strong></font>的函数<br>实现在 /kernel/timer.c 中  </p>
+<pre><code>/**
+ * schedule_timeout - sleep until timeout
+ * @timeout: timeout value in jiffies
+ *
+ * Make the current task sleep until @timeout jiffies have
+ * elapsed. The routine will return immediately unless
+ * the current task state has been set (see set_current_state()).
+ *
+ * You can set the task state as follows -
+ *
+ * %TASK_UNINTERRUPTIBLE - at least @timeout jiffies are guaranteed to
+ * pass before the routine returns. The routine will return 0
+ *
+ * %TASK_INTERRUPTIBLE - the routine may return early if a signal is
+ * delivered to the current task. In this case the remaining time
+ * in jiffies will be returned, or 0 if the timer expired in time
+ *
+ * The current task state is guaranteed to be TASK_RUNNING when this
+ * routine returns.
+ *
+ * Specifying a @timeout value of %MAX_SCHEDULE_TIMEOUT will schedule
+ * the CPU away without a bound on the timeout. In this case the return
+ * value will be %MAX_SCHEDULE_TIMEOUT.
+ *
+ * In all cases the return value is guaranteed to be non-negative.
+ */
+signed long __sched schedule_timeout(signed long timeout)
+{
+    struct timer_list timer;
+    unsigned long expire;
+
+    switch (timeout)
+    {
+    case MAX_SCHEDULE_TIMEOUT:
+        /*
+         * These two special cases are useful to be comfortable
+         * in the caller. Nothing more. We could take
+         * MAX_SCHEDULE_TIMEOUT from one of the negative value
+         * but I' d like to return a valid offset (>=0) to allow
+         * the caller to do everything it want with the retval.
+         */
+        schedule();
+        goto out;
+    default:
+        /*
+         * Another bit of PARANOID. Note that the retval will be
+         * 0 since no piece of kernel is supposed to do a check
+         * for a negative retval of schedule_timeout() (since it
+         * should never happens anyway). You just have the printk()
+         * that will tell you if something is gone wrong and where.
+         */
+        if (timeout < 0) {
+            printk(KERN_ERR "schedule_timeout: wrong timeout "
+                "value %lx\n", timeout);
+            dump_stack();
+            current->state = TASK_RUNNING;
+            goto out;
+        }
+    }
+
+    expire = timeout + jiffies;
+
+    setup_timer_on_stack(&timer, process_timeout, (unsigned long)current);
+    __mod_timer(&timer, expire, false, TIMER_NOT_PINNED);
+    schedule();
+    del_singleshot_timer_sync(&timer);
+
+    /* Remove the timer from the object tracker */
+    destroy_timer_on_stack(&timer);
+
+    timeout = expire - jiffies;
+
+ out:
+    return timeout < 0 ? 0 : timeout;
+}
+EXPORT_SYMBOL(schedule_timeout);
+</code></pre> 
+
+<p>简单来说就是在schedule()前设置了一个<font color="red"><strong>timer</strong></font>，timeout的时间后就wake_up_process(current)</p>
+<hr>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考:"></a>参考:</h1><ol>
+<li><a href="http://m.blog.csdn.net/article/details?id=51314051" target="_blank" rel="external">进程调度2 by u012681083</a></li>
+</ol>
+
+      
+    </div>
+
+    <div>
+      
+        
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/内核调度/" rel="tag">#内核调度</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/06/28/linux-kernel-compile-install/" rel="next" title="linux kernel compile&install">
+                <i class="fa fa-chevron-left"></i> linux kernel compile&install
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/06/29/schedule-practice-semaphore/" rel="prev" title="schedule practice:semaphore">
+                schedule practice:semaphore <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.gif"
+               alt="Zexin Hu" />
+          <p class="site-author-name" itemprop="name">Zexin Hu</p>
+          <p class="site-description motion-element" itemprop="description"></p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">4</span>
+              <span class="site-state-item-name">posts</span>
+            </a>
+          </div>
+
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">2</span>
+                <span class="site-state-item-name">tags</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#线程描述"><span class="nav-number">1.</span> <span class="nav-text">线程描述</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#调度"><span class="nav-number">2.</span> <span class="nav-text">调度</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考"><span class="nav-number">3.</span> <span class="nav-text">参考:</span></a></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2016</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zexin Hu</span>
+</div>
+
+<div class="powered-by">
+  Powered by <a class="theme-link" href="http://hexo.io">Hexo</a>
+</div>
+
+<div class="theme-info">
+  Theme -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Muse
+  </a>
+</div>
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+  
+  
+  
+
+  
+
+  
+
+</body>
+</html>

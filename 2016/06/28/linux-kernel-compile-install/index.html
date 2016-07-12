@@ -1,0 +1,572 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="kernel ; linux," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="通过ssh到服务器的，可以使用sz和rz命令传输文件，如果缺少，请安装lrzsz">
+<meta property="og:type" content="article">
+<meta property="og:title" content="linux kernel compile&install">
+<meta property="og:url" content="http://yoursite.com/2016/06/28/linux-kernel-compile-install/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="通过ssh到服务器的，可以使用sz和rz命令传输文件，如果缺少，请安装lrzsz">
+<meta property="og:image" content="http://yoursite.com/my_images/linux-kernel-compile-install/grub2.cfg.png">
+<meta property="og:updated_time" content="2016-07-12T07:37:13.160Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="linux kernel compile&install">
+<meta name="twitter:description" content="通过ssh到服务器的，可以使用sz和rz命令传输文件，如果缺少，请安装lrzsz">
+<meta name="twitter:image" content="http://yoursite.com/my_images/linux-kernel-compile-install/grub2.cfg.png">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Muse',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: 'Author'
+    }
+  };
+</script>
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2016/06/28/linux-kernel-compile-install/"/>
+
+  <title> linux kernel compile&install | Hexo </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">Hexo</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle"></p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                linux kernel compile&install
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">Posted on</span>
+            <time itemprop="dateCreated" datetime="2016-06-28T14:13:22+08:00" content="2016-06-28">
+              2016-06-28
+            </time>
+          </span>
+
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>通过ssh到服务器的，可以使用sz和rz命令传输文件，如果缺少，请安装lrzsz  </p>
+<a id="more"></a>
+<h1 id="编译安装"><a href="#编译安装" class="headerlink" title="编译安装"></a>编译安装</h1><p>选的内核版本是<font color="red"><strong>kernel-3.10.102</strong></font><br>先配置编译内容</p>
+<pre><code>make menuconfig
+</code></pre>
+
+<p>menuconfig需要<font color="red"><strong>ncurses-devel</strong></font><br>网络安装之</p>
+<p>编译的问题多种多样，比如我在centos7 <font color="red"><strong>minimal</strong></font>上遇到的直接make 没有生成bzImage，install的时候提示我找不到这镜像= =，最后 make all才出现镜像。<br>install之后，模块和镜像会在下面目录里</p>
+<font color="red"><strong>/lib/modules/</strong></font><br><font color="red"><strong>/boot/</strong></font>
+
+<p>make的时候可以带 -j 参数，表示多个job同时执行，提高CPU利用率，减少等待时间</p>
+<h1 id="设置启动entry"><a href="#设置启动entry" class="headerlink" title="设置启动entry"></a>设置启动entry</h1><font color="red"><strong>/boot/grub2</strong></font>目录下有grub2的配置文件，一般是cfg后缀<br><pre><code>what the fuck, md的```会和font标签冲突<br>以后难道要自己css？<br></code></pre><br><br><pre><code>cat /boot/grub2/grub.cfg |grep Linux //查看当前可以启动的内核项；<br></code></pre><br>除了linux的还有win的启动项，都在这个文件里<br><br><pre><code>grub2-mkconfig -o /boot/grub2/grub.cfg //生成grub2的配置文件<br></code></pre><br>这个命令好像会根据/boot下的bzImage生成配置文件，删掉不要的Image后，在执行就会发现，删了的entry没了，我一般就这么删old kernel<br><br>新生成的配置文件会直接覆盖原来的cfg，所以以防出问题，最好备份下old。<br>至少留一个原来的正常的内核，以防新编译的内核出问题，进不了系统就麻烦了<br><br>这时的默认启动内核还是<font weight="bold" color="red">原来</font>的，我们来设置默认从新安装的启动<br><br><pre><code>grub2-set-default “CentOS Linux (3.10.102) 7 (Core)”<br></code></pre><br>双引号中的内容是在上面cat中看到的，接在menuentry单词后面，单引号括起来的一句话<br>如图<br><img src="/my_images/linux-kernel-compile-install/grub2.cfg.png" alt="grub2.cfg"><br><br>如果提示command not found，试试安装<font color="red"><strong>os-prober</strong></font>
+
+<hr>
+<center><font size="7" color="red">这篇博文除了标题、粗体和图片，字体颜色、大小、代码片用css排</font></center>
+      
+    </div>
+
+    <div>
+      
+        
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/kernel-linux/" rel="tag">#kernel ; linux</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/06/27/welcome to my blog/" rel="next" title="welcome to my blog">
+                <i class="fa fa-chevron-left"></i> welcome to my blog
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/06/28/kthread-schedule/" rel="prev" title="kthread schedule">
+                kthread schedule <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.gif"
+               alt="Zexin Hu" />
+          <p class="site-author-name" itemprop="name">Zexin Hu</p>
+          <p class="site-description motion-element" itemprop="description"></p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">4</span>
+              <span class="site-state-item-name">posts</span>
+            </a>
+          </div>
+
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">2</span>
+                <span class="site-state-item-name">tags</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#编译安装"><span class="nav-number">1.</span> <span class="nav-text">编译安装</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#设置启动entry"><span class="nav-number">2.</span> <span class="nav-text">设置启动entry</span></a></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2016</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zexin Hu</span>
+</div>
+
+<div class="powered-by">
+  Powered by <a class="theme-link" href="http://hexo.io">Hexo</a>
+</div>
+
+<div class="theme-info">
+  Theme -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Muse
+  </a>
+</div>
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+  
+  
+  
+
+  
+
+  
+
+</body>
+</html>
